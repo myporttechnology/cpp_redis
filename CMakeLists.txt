@@ -76,10 +76,10 @@ endif(WIN32)
 ###
 # variables
 ###
-find_path(TACOPIE_INCLUDE_DIR tacopie/tacopie PATHS ${PROJECT_SOURCE_DIR}/tacopie/includes/)
-find_library(TACOPIE_LIBRARY tacopie)
+#find_path(TACOPIE_INCLUDE_DIR tacopie/tacopie PATHS ${PROJECT_SOURCE_DIR}/tacopie/includes/)
+#find_library(TACOPIE_LIBRARY tacopie)
 set(CPP_REDIS_INCLUDES ${PROJECT_SOURCE_DIR}/includes)
-set(DEPS_INCLUDES ${PROJECT_SOURCE_DIR}/deps/include ${TACOPIE_INCLUDE_DIR})
+#set(DEPS_INCLUDES ${PROJECT_SOURCE_DIR}/deps/include ${TACOPIE_INCLUDE_DIR})
 set(DEPS_LIBRARIES ${PROJECT_SOURCE_DIR}/deps/lib)
 
 
