@@ -109,7 +109,7 @@ redis_connection::build_command(const std::vector<std::string>& redis_cmd) {
 
 redis_connection&
 redis_connection::send(const std::vector<std::string>& redis_cmd) {
-  std::lock_guard<std::mutex> lock(m_buffer_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_buffer_mutex);
 
   m_buffer += build_command(redis_cmd);
   __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection stored new command in the send buffer");
@@ -120,7 +120,7 @@ redis_connection::send(const std::vector<std::string>& redis_cmd) {
 //! commit pipelined transaction
 redis_connection&
 redis_connection::commit(void) {
-  std::lock_guard<std::mutex> lock(m_buffer_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_buffer_mutex);
 
   //! ensure buffer is cleared
   __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection attempts to send pipelined commands");

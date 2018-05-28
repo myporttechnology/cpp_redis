@@ -32,7 +32,7 @@
 #include <Winsock2.h>
 #endif /* _WIN32 */
 
-std::condition_variable should_exit;
+std::condition_variable_any should_exit;
 
 void
 sigint_handler(int) {
@@ -82,8 +82,8 @@ main(void) {
   sub.commit();
 
   signal(SIGINT, &sigint_handler);
-  std::mutex mtx;
-  std::unique_lock<std::mutex> l(mtx);
+  std::recursive_mutex mtx;
+  std::unique_lock<std::recursive_mutex> l(mtx);
   should_exit.wait(l);
 
 #ifdef _WIN32

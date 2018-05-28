@@ -260,7 +260,7 @@ TEST(RedisClient, MultipleSendPipeline) {
 
 TEST(RedisClient, DisconnectionHandlerWithQuit) {
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   std::atomic<bool> disconnection_handler_called = ATOMIC_VAR_INIT(false);
   client.connect("127.0.0.1", 6379, [&](const std::string&, std::size_t, cpp_redis::client::connect_state status) {
@@ -273,8 +273,8 @@ TEST(RedisClient, DisconnectionHandlerWithQuit) {
   client.send({"QUIT"});
   client.sync_commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(2));
 
   EXPECT_TRUE(disconnection_handler_called);
@@ -282,7 +282,7 @@ TEST(RedisClient, DisconnectionHandlerWithQuit) {
 
 TEST(RedisClient, DisconnectionHandlerWithoutQuit) {
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   std::atomic<bool> disconnection_handler_called = ATOMIC_VAR_INIT(false);
   client.connect("127.0.0.1", 6379, [&](const std::string&, std::size_t, cpp_redis::client::connect_state status) {
@@ -294,8 +294,8 @@ TEST(RedisClient, DisconnectionHandlerWithoutQuit) {
 
   client.sync_commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(2));
 
   EXPECT_FALSE(disconnection_handler_called);

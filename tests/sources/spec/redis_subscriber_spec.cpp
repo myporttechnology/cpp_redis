@@ -150,7 +150,7 @@ TEST(RedisSubscriber, PUnsubscribeNotConnected) {
 TEST(RedisSubscriber, SubConnectedCommitConnected) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -168,8 +168,8 @@ TEST(RedisSubscriber, SubConnectedCommitConnected) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return callback_run; });
 
   EXPECT_TRUE(callback_run);
@@ -178,7 +178,7 @@ TEST(RedisSubscriber, SubConnectedCommitConnected) {
 TEST(RedisSubscriber, SubNotConnectedCommitConnected) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   client.connect();
 
@@ -196,8 +196,8 @@ TEST(RedisSubscriber, SubNotConnectedCommitConnected) {
   sub.connect();
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return callback_run; });
 
   EXPECT_TRUE(callback_run);
@@ -232,7 +232,7 @@ TEST(RedisSubscriber, SubNotConnectedCommitNotConnectedCommitConnected) {
 TEST(RedisSubscriber, SubscribeSomethingPublished) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -252,8 +252,8 @@ TEST(RedisSubscriber, SubscribeSomethingPublished) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return callback_run; });
 
   EXPECT_TRUE(callback_run);
@@ -262,7 +262,7 @@ TEST(RedisSubscriber, SubscribeSomethingPublished) {
 TEST(RedisSubscriber, SubscribeMultiplePublished) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -286,8 +286,8 @@ TEST(RedisSubscriber, SubscribeMultiplePublished) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return number_times_called == 2; });
 
   EXPECT_TRUE(number_times_called == 2);
@@ -320,7 +320,7 @@ TEST(RedisSubscriber, SubscribeNothingPublished) {
 TEST(RedisSubscriber, MultipleSubscribeSomethingPublished) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -358,8 +358,8 @@ TEST(RedisSubscriber, MultipleSubscribeSomethingPublished) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return callback_1_run && callback_2_run; });
 
   EXPECT_TRUE(callback_1_run);
@@ -369,7 +369,7 @@ TEST(RedisSubscriber, MultipleSubscribeSomethingPublished) {
 TEST(RedisSubscriber, PSubscribeSomethingPublished) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -389,8 +389,8 @@ TEST(RedisSubscriber, PSubscribeSomethingPublished) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return callback_run; });
 
   EXPECT_TRUE(callback_run);
@@ -399,7 +399,7 @@ TEST(RedisSubscriber, PSubscribeSomethingPublished) {
 TEST(RedisSubscriber, PSubscribeMultiplePublished) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -430,8 +430,8 @@ TEST(RedisSubscriber, PSubscribeMultiplePublished) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return number_times_called == 2; });
 
   EXPECT_TRUE(number_times_called == 2);
@@ -464,7 +464,7 @@ TEST(RedisSubscriber, PSubscribeNothingPublished) {
 TEST(RedisSubscriber, MultiplePSubscribeSomethingPublished) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -502,8 +502,8 @@ TEST(RedisSubscriber, MultiplePSubscribeSomethingPublished) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return callback_1_run && callback_2_run; });
 
   EXPECT_TRUE(callback_1_run);
@@ -513,7 +513,7 @@ TEST(RedisSubscriber, MultiplePSubscribeSomethingPublished) {
 TEST(RedisSubscriber, Unsubscribe) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -543,8 +543,8 @@ TEST(RedisSubscriber, Unsubscribe) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return callback_2_run; });
 
   EXPECT_FALSE(callback_1_run);
@@ -554,7 +554,7 @@ TEST(RedisSubscriber, Unsubscribe) {
 TEST(RedisSubscriber, PUnsubscribe) {
   cpp_redis::subscriber sub;
   cpp_redis::client client;
-  std::condition_variable cv;
+  std::condition_variable_any cv;
 
   sub.connect();
   client.connect();
@@ -584,8 +584,8 @@ TEST(RedisSubscriber, PUnsubscribe) {
 
   sub.commit();
 
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
+  std::recursive_mutex mutex;
+  std::unique_lock<std::recursive_mutex> lock(mutex);
   cv.wait_for(lock, std::chrono::seconds(10), [&]() -> bool { return callback_2_run; });
 
   EXPECT_FALSE(callback_1_run);

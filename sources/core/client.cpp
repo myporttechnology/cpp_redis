@@ -166,7 +166,7 @@ client::clear_sentinels(void) {
 
 client&
 client::send(const std::vector<std::string>& redis_cmd, const reply_callback_t& callback) {
-  std::lock_guard<std::mutex> lock_callback(m_callbacks_mutex);
+  std::lock_guard<std::recursive_mutex> lock_callback(m_callbacks_mutex);
 
   __CPP_REDIS_LOG(info, "cpp_redis::client attemps to store new command in the send buffer");
   unprotected_send(redis_cmd, callback);
@@ -201,7 +201,7 @@ client::sync_commit(void) {
     try_commit();
   }
 
-  std::unique_lock<std::mutex> lock_callback(m_callbacks_mutex);
+  std::unique_lock<std::recursive_mutex> lock_callback(m_callbacks_mutex);
   __CPP_REDIS_LOG(debug, "cpp_redis::client waiting for callbacks to complete");
   m_sync_condvar.wait(lock_callback, [=] { return m_callbacks_running == 0 && m_commands.empty(); });
   __CPP_REDIS_LOG(debug, "cpp_redis::client finished waiting for callback completion");
@@ -229,7 +229,7 @@ client::connection_receive_handler(network::redis_connection&, reply& reply) {
 
   __CPP_REDIS_LOG(info, "cpp_redis::client received reply");
   {
-    std::lock_guard<std::mutex> lock(m_callbacks_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_callbacks_mutex);
     m_callbacks_running += 1;
 
     if (m_commands.size()) {
@@ -244,7 +244,7 @@ client::connection_receive_handler(network::redis_connection&, reply& reply) {
   }
 
   {
-    std::lock_guard<std::mutex> lock(m_callbacks_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_callbacks_mutex);
     m_callbacks_running -= 1;
     m_sync_condvar.notify_all();
   }
@@ -314,7 +314,7 @@ client::connection_disconnection_handler(network::redis_connection&) {
   }
 
   //! Lock the callbacks mutex of the base class to prevent more client commands from being issued until our reconnect has completed.
-  std::lock_guard<std::mutex> lock_callback(m_callbacks_mutex);
+  std::lock_guard<std::recursive_mutex> lock_callback(m_callbacks_mutex);
 
   while (should_reconnect()) {
     sleep_before_next_reconnect_attempt();
@@ -494,7 +494,7 @@ client::append(const std::string& key, const std::string& value, const reply_cal
 
 client&
 client::auth(const std::string& password, const reply_callback_t& reply_callback) {
-  std::lock_guard<std::mutex> lock(m_callbacks_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_callbacks_mutex);
 
   unprotected_auth(password, reply_callback);
 
@@ -1698,7 +1698,7 @@ client::sdiffstore(const std::string& destination, const std::vector<std::string
 
 client&
 client::select(int index, const reply_callback_t& reply_callback) {
-  std::lock_guard<std::mutex> lock(m_callbacks_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_callbacks_mutex);
 
   unprotected_select(index, reply_callback);
 

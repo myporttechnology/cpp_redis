@@ -177,7 +177,7 @@ private:
   //!
   //! protect internal buffer against race conditions
   //!
-  std::mutex m_buffer_mutex;
+  std::recursive_mutex m_buffer_mutex;
 };
 
 } // namespace network

@@ -171,7 +171,7 @@ sentinel::connection_receive_handler(network::redis_connection&, reply& reply) {
 
   __CPP_REDIS_LOG(info, "cpp_redis::sentinel received reply");
   {
-    std::lock_guard<std::mutex> lock(m_callbacks_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_callbacks_mutex);
     m_callbacks_running += 1;
 
     if (m_callbacks.size()) {
@@ -186,7 +186,7 @@ sentinel::connection_receive_handler(network::redis_connection&, reply& reply) {
   }
 
   {
-    std::lock_guard<std::mutex> lock(m_callbacks_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_callbacks_mutex);
     m_callbacks_running -= 1;
     m_sync_condvar.notify_all();
   }
@@ -194,7 +194,7 @@ sentinel::connection_receive_handler(network::redis_connection&, reply& reply) {
 
 void
 sentinel::clear_callbacks(void) {
-  std::lock_guard<std::mutex> lock(m_callbacks_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_callbacks_mutex);
 
   std::queue<reply_callback_t> empty;
   std::swap(m_callbacks, empty);
@@ -241,7 +241,7 @@ sentinel::get_sentinels(void) {
 
 sentinel&
 sentinel::send(const std::vector<std::string>& redis_cmd, const reply_callback_t& callback) {
-  std::lock_guard<std::mutex> lock_callback(m_callbacks_mutex);
+  std::lock_guard<std::recursive_mutex> lock_callback(m_callbacks_mutex);
 
   __CPP_REDIS_LOG(info, "cpp_redis::sentinel attempts to store new command in the send buffer");
   m_client.send(redis_cmd);
@@ -262,7 +262,7 @@ sentinel::commit(void) {
 sentinel&
 sentinel::sync_commit() {
   try_commit();
-  std::unique_lock<std::mutex> lock_callback(m_callbacks_mutex);
+  std::unique_lock<std::recursive_mutex> lock_callback(m_callbacks_mutex);
   __CPP_REDIS_LOG(debug, "cpp_redis::sentinel waiting for callbacks to complete");
   m_sync_condvar.wait(lock_callback, [=] { return m_callbacks_running == 0 && m_callbacks.empty(); });
   __CPP_REDIS_LOG(debug, "cpp_redis::sentinel finished waiting for callback completion");

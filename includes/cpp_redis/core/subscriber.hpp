@@ -314,7 +314,7 @@ private:
   //! \param channels_mtx channels or patterns mtx to be locked for race condition
   //! \param nb_chans redis server ack reply
   //!
-  void call_acknowledgement_callback(const std::string& channel, const std::map<std::string, callback_holder>& channels, std::mutex& channels_mtx, int64_t nb_chans);
+  void call_acknowledgement_callback(const std::string& channel, const std::map<std::string, callback_holder>& channels, std::recursive_mutex& channels_mtx, int64_t nb_chans);
 
 private:
   //!
@@ -440,11 +440,11 @@ private:
   //!
   //! sub chans thread safety
   //!
-  std::mutex m_psubscribed_channels_mutex;
+  std::recursive_mutex m_psubscribed_channels_mutex;
   //!
   //! psub chans thread safety
   //!
-  std::mutex m_subscribed_channels_mutex;
+  std::recursive_mutex m_subscribed_channels_mutex;
 
   //!
   //! auth reply callback

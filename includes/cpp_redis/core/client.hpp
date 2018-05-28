@@ -221,7 +221,7 @@ public:
       try_commit();
     }
 
-    std::unique_lock<std::mutex> lock_callback(m_callbacks_mutex);
+    std::unique_lock<std::recursive_mutex> lock_callback(m_callbacks_mutex);
     __CPP_REDIS_LOG(debug, "cpp_redis::client waiting for callbacks to complete");
     if (!m_sync_condvar.wait_for(lock_callback, timeout, [=] { return m_callbacks_running == 0 && m_commands.empty(); })) {
       __CPP_REDIS_LOG(debug, "cpp_redis::client finished waiting for callback");
@@ -1457,12 +1457,12 @@ private:
   //!
   //!  callbacks thread safety
   //!
-  std::mutex m_callbacks_mutex;
+  std::recursive_mutex m_callbacks_mutex;
 
   //!
   //! condvar for callbacks updates
   //!
-  std::condition_variable m_sync_condvar;
+  std::condition_variable_any m_sync_condvar;
 
   //!
   //! number of callbacks currently being running

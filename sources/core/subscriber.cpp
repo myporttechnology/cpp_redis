@@ -177,7 +177,7 @@ subscriber::is_reconnecting(void) const {
 
 subscriber&
 subscriber::subscribe(const std::string& channel, const subscribe_callback_t& callback, const acknowledgement_callback_t& acknowledgement_callback) {
-  std::lock_guard<std::mutex> lock(m_subscribed_channels_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_subscribed_channels_mutex);
 
   __CPP_REDIS_LOG(debug, "cpp_redis::subscriber attemps to subscribe to channel " + channel);
   unprotected_subscribe(channel, callback, acknowledgement_callback);
@@ -194,7 +194,7 @@ subscriber::unprotected_subscribe(const std::string& channel, const subscribe_ca
 
 subscriber&
 subscriber::psubscribe(const std::string& pattern, const subscribe_callback_t& callback, const acknowledgement_callback_t& acknowledgement_callback) {
-  std::lock_guard<std::mutex> lock(m_psubscribed_channels_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_psubscribed_channels_mutex);
 
   __CPP_REDIS_LOG(debug, "cpp_redis::subscriber attemps to psubscribe to channel " + pattern);
   unprotected_psubscribe(pattern, callback, acknowledgement_callback);
@@ -211,7 +211,7 @@ subscriber::unprotected_psubscribe(const std::string& pattern, const subscribe_c
 
 subscriber&
 subscriber::unsubscribe(const std::string& channel) {
-  std::lock_guard<std::mutex> lock(m_subscribed_channels_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_subscribed_channels_mutex);
 
   __CPP_REDIS_LOG(debug, "cpp_redis::subscriber attemps to unsubscribe from channel " + channel);
   auto it = m_subscribed_channels.find(channel);
@@ -229,7 +229,7 @@ subscriber::unsubscribe(const std::string& channel) {
 
 subscriber&
 subscriber::punsubscribe(const std::string& pattern) {
-  std::lock_guard<std::mutex> lock(m_psubscribed_channels_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_psubscribed_channels_mutex);
 
   __CPP_REDIS_LOG(debug, "cpp_redis::subscriber attemps to punsubscribe from channel " + pattern);
   auto it = m_psubscribed_channels.find(pattern);
@@ -261,8 +261,8 @@ subscriber::commit(void) {
 }
 
 void
-subscriber::call_acknowledgement_callback(const std::string& channel, const std::map<std::string, callback_holder>& channels, std::mutex& channels_mtx, int64_t nb_chans) {
-  std::lock_guard<std::mutex> lock(channels_mtx);
+subscriber::call_acknowledgement_callback(const std::string& channel, const std::map<std::string, callback_holder>& channels, std::recursive_mutex& channels_mtx, int64_t nb_chans) {
+  std::lock_guard<std::recursive_mutex> lock(channels_mtx);
 
   auto it = channels.find(channel);
   if (it == channels.end())
@@ -311,7 +311,7 @@ subscriber::handle_subscribe_reply(const std::vector<reply>& reply) {
   if (title.as_string() != "message")
     return;
 
-  std::lock_guard<std::mutex> lock(m_subscribed_channels_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_subscribed_channels_mutex);
 
   auto it = m_subscribed_channels.find(channel.as_string());
   if (it == m_subscribed_channels.end())
@@ -340,7 +340,7 @@ subscriber::handle_psubscribe_reply(const std::vector<reply>& reply) {
   if (title.as_string() != "pmessage")
     return;
 
-  std::lock_guard<std::mutex> lock(m_psubscribed_channels_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_psubscribed_channels_mutex);
 
   auto it = m_psubscribed_channels.find(pchannel.as_string());
   if (it == m_psubscribed_channels.end())
@@ -400,8 +400,8 @@ subscriber::connection_disconnection_handler(network::redis_connection&) {
   }
 
   //! Lock the callbacks mutex of the base class to prevent more subscriber commands from being issued until our reconnect has completed.
-  std::lock_guard<std::mutex> sub_lock_callback(m_subscribed_channels_mutex);
-  std::lock_guard<std::mutex> psub_lock_callback(m_psubscribed_channels_mutex);
+  std::lock_guard<std::recursive_mutex> sub_lock_callback(m_subscribed_channels_mutex);
+  std::lock_guard<std::recursive_mutex> psub_lock_callback(m_psubscribed_channels_mutex);
 
   while (should_reconnect()) {
     sleep_before_next_reconnect_attempt();
@@ -473,9 +473,9 @@ subscriber::reconnect(void) {
   }
 
   //! notify end
-  if (m_connect_callback) {
-    m_connect_callback(m_redis_server, m_redis_port, connect_state::ok);
-  }
+  //if (m_connect_callback) {
+  //  m_connect_callback(m_redis_server, m_redis_port, connect_state::ok);
+  //}
 
   __CPP_REDIS_LOG(info, "client reconnected ok");
 

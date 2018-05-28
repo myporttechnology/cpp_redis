@@ -40,7 +40,7 @@ logger::logger(log_level level)
 void
 logger::debug(const std::string& msg, const std::string& file, std::size_t line) {
   if (m_level >= log_level::debug) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     std::cout << "[" << black << "DEBUG" << normal << "][cpp_redis][" << file << ":" << line << "] " << msg << std::endl;
   }
 }
@@ -48,7 +48,7 @@ logger::debug(const std::string& msg, const std::string& file, std::size_t line)
 void
 logger::info(const std::string& msg, const std::string& file, std::size_t line) {
   if (m_level >= log_level::info) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     std::cout << "[" << blue << "INFO " << normal << "][cpp_redis][" << file << ":" << line << "] " << msg << std::endl;
   }
 }
@@ -56,7 +56,7 @@ logger::info(const std::string& msg, const std::string& file, std::size_t line) 
 void
 logger::warn(const std::string& msg, const std::string& file, std::size_t line) {
   if (m_level >= log_level::warn) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     std::cout << "[" << yellow << "WARN " << normal << "][cpp_redis][" << file << ":" << line << "] " << msg << std::endl;
   }
 }
@@ -64,7 +64,7 @@ logger::warn(const std::string& msg, const std::string& file, std::size_t line) 
 void
 logger::error(const std::string& msg, const std::string& file, std::size_t line) {
   if (m_level >= log_level::error) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     std::cerr << "[" << red << "ERROR" << normal << "][cpp_redis][" << file << ":" << line << "] " << msg << std::endl;
   }
 }

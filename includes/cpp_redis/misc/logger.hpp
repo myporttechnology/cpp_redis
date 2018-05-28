@@ -154,7 +154,7 @@ private:
   //!
   //! mutex used to serialize logs in multithreaded environment
   //!
-  std::mutex m_mutex;
+  std::recursive_mutex m_mutex;
 };
 
 //!
