@@ -1364,6 +1364,12 @@ private:
   void connection_disconnection_handler(network::redis_connection& connection);
 
   //!
+  //! redis_connection connection handler, triggered whenever a connection was successful or failed
+  //!
+  //! \param connection redis_connection instance
+  //!
+  void connection_connection_handler(network::redis_connection& connection, bool success);
+  //!
   //! reset the queue of pending callbacks
   //!
   void clear_callbacks(void);

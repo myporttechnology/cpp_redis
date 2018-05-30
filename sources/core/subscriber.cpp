@@ -93,7 +93,7 @@ subscriber::connect(
   std::uint32_t timeout_msecs,
   std::int32_t max_reconnects,
   std::uint32_t reconnect_interval_msecs) {
-  __CPP_REDIS_LOG(debug, "cpp_redis::subscriber attempts to connect");
+  __CPP_REDIS_LOG(debug, "cpp_redis::client attempts to connect");
 
   //! Save for auto reconnects
   m_redis_server             = host;
@@ -108,15 +108,9 @@ subscriber::connect(
   }
 
   auto disconnection_handler = std::bind(&subscriber::connection_disconnection_handler, this, std::placeholders::_1);
+  auto connection_handler = std::bind(&subscriber::connection_connection_handler, this, std::placeholders::_1, std::placeholders::_2);
   auto receive_handler       = std::bind(&subscriber::connection_receive_handler, this, std::placeholders::_1, std::placeholders::_2);
-  m_client.connect(host, port, disconnection_handler, receive_handler, timeout_msecs);
-
-  //! notify end
-  if (m_connect_callback) {
-    m_connect_callback(m_redis_server, m_redis_port, connect_state::ok);
-  }
-
-  __CPP_REDIS_LOG(info, "cpp_redis::subscriber connected");
+  m_client.connect(host, port, disconnection_handler, receive_handler, connection_handler);
 }
 
 void
@@ -402,23 +396,45 @@ subscriber::connection_disconnection_handler(network::redis_connection&) {
   //! Lock the callbacks mutex of the base class to prevent more subscriber commands from being issued until our reconnect has completed.
   std::lock_guard<std::recursive_mutex> sub_lock_callback(m_subscribed_channels_mutex);
   std::lock_guard<std::recursive_mutex> psub_lock_callback(m_psubscribed_channels_mutex);
-
-  while (should_reconnect()) {
-    sleep_before_next_reconnect_attempt();
+  
+  if (should_reconnect()) {
     reconnect();
   }
+}
 
-  if (!is_connected()) {
-    clear_subscriptions();
-
-    //! Tell the user we gave up!
-    if (m_connect_callback) {
-      m_connect_callback(m_redis_server, m_redis_port, connect_state::stopped);
+void
+subscriber::connection_connection_handler(network::redis_connection&, bool success) {   
+  __CPP_REDIS_LOG(info, "cpp_redis::subscriber connected");
+  if (m_connect_callback) {
+    if (success) {
+      m_connect_callback(m_redis_server, m_redis_port, connect_state::ok);
+    } else {
+      m_connect_callback(m_redis_server, m_redis_port, connect_state::failed);
     }
   }
+  
+  if (m_reconnecting) {
+    if (success) {
+      __CPP_REDIS_LOG(info, "subscriber reconnected ok");
 
-  //! terminate reconnection
-  m_reconnecting = false;
+      re_auth();
+      re_subscribe();
+      commit();
+      m_reconnecting = false;
+    } else {
+      if (should_reconnect()) {      //TODO implement number of retrys, at the moment endless retry to connect
+        reconnect(); 
+        return;
+      } else {
+        clear_subscriptions();
+        //! Tell the user we gave up!
+        if (m_connect_callback) {
+          m_connect_callback(m_redis_server, m_redis_port, connect_state::stopped);
+        }
+        m_reconnecting = false;
+      }
+    }
+  }
 }
 
 void
@@ -458,30 +474,7 @@ subscriber::reconnect(void) {
     return;
   }
 
-  //! Try catch block because the redis subscriber throws an error if connection cannot be made.
-  try {
-    connect(m_redis_server, m_redis_port, m_connect_callback, m_connect_timeout_msecs, m_max_reconnects, m_reconnect_interval_msecs);
-  }
-  catch (...) {
-  }
-
-  if (!is_connected()) {
-    if (m_connect_callback) {
-      m_connect_callback(m_redis_server, m_redis_port, connect_state::failed);
-    }
-    return;
-  }
-
-  //! notify end
-  //if (m_connect_callback) {
-  //  m_connect_callback(m_redis_server, m_redis_port, connect_state::ok);
-  //}
-
-  __CPP_REDIS_LOG(info, "client reconnected ok");
-
-  re_auth();
-  re_subscribe();
-  commit();
+  connect(m_redis_server, m_redis_port, m_connect_callback, m_connect_timeout_msecs, m_max_reconnects, m_reconnect_interval_msecs);
 }
 
 void

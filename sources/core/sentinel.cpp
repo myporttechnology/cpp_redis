@@ -124,7 +124,7 @@ sentinel::connect_sentinel(const sentinel_disconnect_handler_t& sentinel_disconn
   while (not_connected && it != m_sentinels.end()) {
     try {
       __CPP_REDIS_LOG(debug, std::string("cpp_redis::sentinel attempting to connect to host ") + it->get_host());
-      m_client.connect(it->get_host(), it->get_port(), disconnect_handler, receive_handler, it->get_timeout_msecs());
+      m_client.connect(it->get_host(), it->get_port(), disconnect_handler, receive_handler, nullptr);
     }
     catch (const redis_error&) {
       __CPP_REDIS_LOG(info, std::string("cpp_redis::sentinel unable to connect to sentinel host ") + it->get_host());
@@ -158,7 +158,7 @@ sentinel::connect(const std::string& host, std::size_t port,
   auto disconnect_handler = std::bind(&sentinel::connection_disconnect_handler, this, std::placeholders::_1);
   auto receive_handler    = std::bind(&sentinel::connection_receive_handler, this, std::placeholders::_1, std::placeholders::_2);
 
-  m_client.connect(host, port, disconnect_handler, receive_handler, timeout_msecs);
+  m_client.connect(host, port, disconnect_handler, receive_handler, nullptr);
 
   __CPP_REDIS_LOG(info, "cpp_redis::sentinel connected");
 

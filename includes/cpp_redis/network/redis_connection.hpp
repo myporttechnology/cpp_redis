@@ -74,6 +74,11 @@ public:
   //! reply handler takes as parameter the instance of the redis_connection and the built reply
   //!
   typedef std::function<void(redis_connection&, reply&)> reply_callback_t;
+   
+  //!
+  //! connection handler takes as parameter the instance of the redis_connection
+  //! 
+  typedef std::function<void(redis_connection&, bool success)> async_connect_handler_t;
 
   //!
   //! connect to the given host and port, and set both disconnection and reply callbacks
@@ -82,14 +87,14 @@ public:
   //! \param port port to be connected to
   //! \param disconnection_handler handler to be called in case of disconnection
   //! \param reply_callback handler to be called once a reply is ready
-  //! \param timeout_msecs max time to connect (in ms)
+  //! \param connection_handler handler to be called in case of connection success or fail
   //!
   void connect(
     const std::string& host                              = "127.0.0.1",
     std::size_t port                                     = 6379,
     const disconnection_handler_t& disconnection_handler = nullptr,
     const reply_callback_t& reply_callback               = nullptr,
-    std::uint32_t timeout_msecs                          = 0);
+    const async_connect_handler_t async_connect_handler  = nullptr);
 
   //!
   //! disconnect from redis server
@@ -135,6 +140,12 @@ private:
   //! called by the tcp_client whenever a disconnection occured
   //!
   void tcp_client_disconnection_handler(void);
+  
+  //!
+  //! tcp_client connection handler
+  //! called by the tcp_client whenever a connection succeded/failed
+  //!
+  void tcp_client_connection_handler(bool success);
 
   //!
   //! transform a user command to a redis command using the redis protocol format
@@ -163,6 +174,11 @@ private:
   //! disconnection handler whenever a disconnection occured
   //!
   disconnection_handler_t m_disconnection_handler;
+  
+  //!
+  //! connection handler whenever a connection was successful or failed
+  //!
+  async_connect_handler_t m_connection_handler;
 
   //!
   //! reply builder used to build replies

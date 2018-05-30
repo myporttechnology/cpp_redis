@@ -54,27 +54,15 @@ void
 redis_connection::connect(const std::string& host, std::size_t port,
   const disconnection_handler_t& client_disconnection_handler,
   const reply_callback_t& client_reply_callback,
-  std::uint32_t timeout_msecs) {
-  try {
-    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection attempts to connect");
+  const async_connect_handler_t async_connect_handler) {
+  __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection attempts to connect");
 
-    //! connect client
-    m_client->connect(host, (uint32_t) port, timeout_msecs);
-    m_client->set_on_disconnection_handler(std::bind(&redis_connection::tcp_client_disconnection_handler, this));
-
-    //! start to read asynchronously
-    tcp_client_iface::read_request request = {__CPP_REDIS_READ_SIZE, std::bind(&redis_connection::tcp_client_receive_handler, this, std::placeholders::_1)};
-    m_client->async_read(request);
-
-    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection connected");
-  }
-  catch (const std::exception& e) {
-    __CPP_REDIS_LOG(error, std::string("cpp_redis::network::redis_connection ") + e.what());
-    throw redis_error(e.what());
-  }
-
+  //! connect client
+  m_client->connect(host, (uint32_t) port, std::bind(&redis_connection::tcp_client_connection_handler, this, std::placeholders::_1));
+    
   m_reply_callback        = client_reply_callback;
   m_disconnection_handler = client_disconnection_handler;
+  m_connection_handler    = async_connect_handler;
 }
 
 void
@@ -192,6 +180,27 @@ redis_connection::tcp_client_disconnection_handler(void) {
   m_builder.reset();
   //! call disconnection handler
   call_disconnection_handler();
+}
+
+void
+redis_connection::tcp_client_connection_handler(bool success) {
+   if(success) {
+    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection has been connected");
+    m_client->set_on_disconnection_handler(std::bind(&redis_connection::tcp_client_disconnection_handler, this));
+
+    //! start to read asynchronously
+    tcp_client_iface::read_request request = {__CPP_REDIS_READ_SIZE, std::bind(&redis_connection::tcp_client_receive_handler, this, std::placeholders::_1)};
+    m_client->async_read(request);
+
+    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection connected");
+  } else {
+    __CPP_REDIS_LOG(error, std::string("cpp_redis::network::redis_connection ") + e.what());
+  }   
+  
+  if (m_connection_handler) {
+    __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection calls connection handler");
+    m_connection_handler(*this, success);
+  } 
 }
 
 } //! network
