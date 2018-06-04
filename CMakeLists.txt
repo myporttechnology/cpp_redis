@@ -136,7 +136,7 @@ configure_file("cpp_redis.pc.in" "${CMAKE_PKGCONFIG_OUTPUT_DIRECTORY}/cpp_redis.
 ###
 # executable
 ###
-add_library(${PROJECT} ${SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES})
 set_property(TARGET ${PROJECT} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if(WIN32)
