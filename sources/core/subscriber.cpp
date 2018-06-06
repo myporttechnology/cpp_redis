@@ -432,6 +432,8 @@ subscriber::connection_connection_handler(network::redis_connection&, bool succe
         m_reconnecting = false;
       }
     }
+  } else if (!success) {
+    connect(m_redis_server, m_redis_port, m_connect_callback, m_max_reconnects, m_reconnect_interval_msecs);
   }
 }
 
