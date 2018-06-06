@@ -151,8 +151,7 @@ sentinel::connect_sentinel(const sentinel_disconnect_handler_t& sentinel_disconn
 
 void
 sentinel::connect(const std::string& host, std::size_t port,
-  const sentinel_disconnect_handler_t& sentinel_disconnect_handler,
-  std::uint32_t timeout_msecs) {
+  const sentinel_disconnect_handler_t& sentinel_disconnect_handler) {
   __CPP_REDIS_LOG(debug, "cpp_redis::sentinel attempts to connect");
 
   auto disconnect_handler = std::bind(&sentinel::connection_disconnect_handler, this, std::placeholders::_1);

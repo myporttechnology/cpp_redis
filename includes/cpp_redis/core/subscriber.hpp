@@ -95,7 +95,6 @@ public:
   //! \param host host to be connected to
   //! \param port port to be connected to
   //! \param connect_callback connect handler to be called on connect events (may be null)
-  //! \param timeout_msecs maximum time to connect
   //! \param max_reconnects maximum attemps of reconnection if connection dropped
   //! \param reconnect_interval_msecs time between two attemps of reconnection
   //!
@@ -103,7 +102,6 @@ public:
     const std::string& host                    = "127.0.0.1",
     std::size_t port                           = 6379,
     const connect_callback_t& connect_callback = nullptr,
-    std::uint32_t timeout_msecs                = 0,
     std::int32_t max_reconnects                = 0,
     std::uint32_t reconnect_interval_msecs     = 0);
 
@@ -112,14 +110,12 @@ public:
   //!
   //! \param name sentinel name
   //! \param connect_callback connect handler to be called on connect events (may be null)
-  //! \param timeout_msecs maximum time to connect
   //! \param max_reconnects maximum attemps of reconnection if connection dropped
   //! \param reconnect_interval_msecs time between two attemps of reconnection
   //!
   void connect(
     const std::string& name,
     const connect_callback_t& connect_callback = nullptr,
-    std::uint32_t timeout_msecs                = 0,
     std::int32_t max_reconnects                = 0,
     std::uint32_t reconnect_interval_msecs     = 0);
 

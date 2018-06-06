@@ -55,7 +55,7 @@ public:
   //! \param port port to be connected to
   //! \param timeout_msecs max time to connect in ms
   //!
-  virtual void connect(const std::string& addr, std::uint32_t port, async_connect_callback_t async_connect_callback) = 0;
+  virtual void connect(const std::string& addr, std::uint32_t port, async_connect_callback_t async_connect_callback, std::uint32_t reconnect_interval_msecs) = 0;
 
   //!
   //! stop the tcp client

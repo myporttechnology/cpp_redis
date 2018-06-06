@@ -94,7 +94,8 @@ public:
     std::size_t port                                     = 6379,
     const disconnection_handler_t& disconnection_handler = nullptr,
     const reply_callback_t& reply_callback               = nullptr,
-    const async_connect_handler_t async_connect_handler  = nullptr);
+    const async_connect_handler_t async_connect_handler  = nullptr,
+    std::uint32_t reconnect_interval_msecs = 0);
 
   //!
   //! disconnect from redis server

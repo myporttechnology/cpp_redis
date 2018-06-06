@@ -70,7 +70,6 @@ void
 subscriber::connect(
   const std::string& name,
   const connect_callback_t& connect_callback,
-  std::uint32_t timeout_msecs,
   std::int32_t max_reconnects,
   std::uint32_t reconnect_interval_msecs) {
   //! Save for auto reconnects
@@ -78,7 +77,7 @@ subscriber::connect(
 
   //! We rely on the sentinel to tell us which redis server is currently the master.
   if (m_sentinel.get_master_addr_by_name(name, m_redis_server, m_redis_port, true)) {
-    connect(m_redis_server, m_redis_port, connect_callback, timeout_msecs, max_reconnects, reconnect_interval_msecs);
+    connect(m_redis_server, m_redis_port, connect_callback, max_reconnects, reconnect_interval_msecs);
   }
   else {
     throw redis_error("cpp_redis::subscriber::connect() could not find master for name " + name);
@@ -90,7 +89,6 @@ void
 subscriber::connect(
   const std::string& host, std::size_t port,
   const connect_callback_t& connect_callback,
-  std::uint32_t timeout_msecs,
   std::int32_t max_reconnects,
   std::uint32_t reconnect_interval_msecs) {
   __CPP_REDIS_LOG(debug, "cpp_redis::client attempts to connect");
@@ -110,7 +108,7 @@ subscriber::connect(
   auto disconnection_handler = std::bind(&subscriber::connection_disconnection_handler, this, std::placeholders::_1);
   auto connection_handler = std::bind(&subscriber::connection_connection_handler, this, std::placeholders::_1, std::placeholders::_2);
   auto receive_handler       = std::bind(&subscriber::connection_receive_handler, this, std::placeholders::_1, std::placeholders::_2);
-  m_client.connect(host, port, disconnection_handler, receive_handler, connection_handler);
+  m_client.connect(host, port, disconnection_handler, receive_handler, connection_handler, reconnect_interval_msecs);
 }
 
 void
@@ -474,7 +472,7 @@ subscriber::reconnect(void) {
     return;
   }
 
-  connect(m_redis_server, m_redis_port, m_connect_callback, m_connect_timeout_msecs, m_max_reconnects, m_reconnect_interval_msecs);
+  connect(m_redis_server, m_redis_port, m_connect_callback, m_max_reconnects, m_reconnect_interval_msecs);
 }
 
 void

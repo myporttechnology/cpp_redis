@@ -165,14 +165,12 @@ public:
   //!
   //! \param host host to be connected to
   //! \param port port to be connected to
-  //! \param timeout_msecs maximum time to connect
   //! \param disconnect_handler handler to be called whenever disconnection occurs
   //!
   void connect(
     const std::string& host,
     std::size_t port,
-    const sentinel_disconnect_handler_t& disconnect_handler = nullptr,
-    std::uint32_t timeout_msecs                             = 0);
+    const sentinel_disconnect_handler_t& disconnect_handler = nullptr);
 
   //!
   //! Used to find the current redis master by asking one or more sentinels. Use high availablity.

@@ -54,11 +54,12 @@ void
 redis_connection::connect(const std::string& host, std::size_t port,
   const disconnection_handler_t& client_disconnection_handler,
   const reply_callback_t& client_reply_callback,
-  const async_connect_handler_t async_connect_handler) {
+  const async_connect_handler_t async_connect_handler,
+  std::uint32_t reconnect_interval_msecs) {
   __CPP_REDIS_LOG(debug, "cpp_redis::network::redis_connection attempts to connect");
 
   //! connect client
-  m_client->connect(host, (uint32_t) port, std::bind(&redis_connection::tcp_client_connection_handler, this, std::placeholders::_1));
+  m_client->connect(host, (uint32_t) port, std::bind(&redis_connection::tcp_client_connection_handler, this, std::placeholders::_1), reconnect_interval_msecs);
     
   m_reply_callback        = client_reply_callback;
   m_disconnection_handler = client_disconnection_handler;
