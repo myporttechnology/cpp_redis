@@ -112,6 +112,11 @@ void
 client::disconnect(bool wait_for_removal) {
   __CPP_REDIS_LOG(debug, "cpp_redis::client attempts to disconnect");
 
+  //! ensure we stop reconnection attemps
+  if (!m_cancel) {
+    cancel_reconnect();
+  }
+
   //! close connection
   m_client.disconnect(wait_for_removal);
 

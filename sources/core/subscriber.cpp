@@ -152,6 +152,11 @@ subscriber::auth(const std::string& password, const reply_callback_t& reply_call
 
 void
 subscriber::disconnect(bool wait_for_removal) {
+  //! ensure we stop reconnection attemps
+  if (!m_cancel) {
+    cancel_reconnect();
+  }
+
   __CPP_REDIS_LOG(debug, "cpp_redis::subscriber attempts to disconnect");
   m_client.disconnect(wait_for_removal);
   __CPP_REDIS_LOG(info, "cpp_redis::subscriber disconnected");
