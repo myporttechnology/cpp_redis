@@ -311,6 +311,14 @@ client::connection_disconnection_handler(network::redis_connection&) {
   if (should_reconnect()) {
     reconnect();
   }
+  else {
+     clear_callbacks();
+     //! Tell the user we gave up!
+     if (m_connect_callback) {
+       m_connect_callback(m_redis_server, m_redis_port, connect_state::stopped);
+     }
+     m_reconnecting = false;
+  }
 }
 
 void
@@ -319,7 +327,8 @@ client::connection_connection_handler(network::redis_connection&, bool success) 
   if (m_connect_callback) {
     if (success) {
       m_connect_callback(m_redis_server, m_redis_port, connect_state::ok);
-    } else {
+    }
+    else {
       m_connect_callback(m_redis_server, m_redis_port, connect_state::failed);
     }
   }
@@ -333,11 +342,13 @@ client::connection_connection_handler(network::redis_connection&, bool success) 
       resend_failed_commands();
       try_commit();
       m_reconnecting = false;
-    } else {
+    }
+    else {
       if (should_reconnect()) {
         reconnect(); 
         return;
-      } else {
+      }
+      else {
         clear_callbacks();
         //! Tell the user we gave up!
         if (m_connect_callback) {
@@ -346,7 +357,8 @@ client::connection_connection_handler(network::redis_connection&, bool success) 
         m_reconnecting = false;
       }
     }
-  } else if (!success) {
+  }
+  else if (!success) {
     connect(m_redis_server, m_redis_port, m_connect_callback, m_max_reconnects, m_reconnect_interval_msecs);
   }
 }
