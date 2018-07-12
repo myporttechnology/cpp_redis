@@ -1,5 +1,21 @@
 # Changelog
 
+## [v4.4.0](https://github.com/mixer20/cpp_redis/releases/tag/4.4.0)
+### Tag
+`4.4.0`.
+### Date
+January 31st, 2018
+### Changes
+* tacopie dependencies removed
+* std::mutex changed to std::recursive_mutex
+* connect function changed to asynchrounous	
+### Additions
+None
+### Removals
+None
+
+
+
 ## [v4.3.1](https://github.com/Cylix/cpp_redis/releases/tag/4.3.1)
 ### Tag
 `4.3.1`.
