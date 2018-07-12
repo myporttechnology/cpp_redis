@@ -79,11 +79,6 @@ public:
   };
 
 public:
-#ifndef __CPP_REDIS_USE_CUSTOM_TCP_CLIENT
-  //! ctor
-  client(void);
-#endif /* __CPP_REDIS_USE_CUSTOM_TCP_CLIENT */
-
   //!
   //! custom ctor to specify custom tcp_client
   //!

@@ -44,11 +44,6 @@ namespace network {
 //!
 class redis_connection {
 public:
-#ifndef __CPP_REDIS_USE_CUSTOM_TCP_CLIENT
-  //! ctor
-  redis_connection(void);
-#endif /* __CPP_REDIS_USE_CUSTOM_TCP_CLIENT */
-
   //!
   //! ctor allowing to specify custom tcp client (default ctor uses the default tacopie tcp client)
   //!

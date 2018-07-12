@@ -39,12 +39,6 @@ namespace cpp_redis {
 //!
 class sentinel {
 public:
-//! ctor & dtor
-#ifndef __CPP_REDIS_USE_CUSTOM_TCP_CLIENT
-  //! default ctor
-  sentinel(void);
-#endif /* __CPP_REDIS_USE_CUSTOM_TCP_CLIENT */
-
   //!
   //! custom ctor to specify custom tcp_client
   //!

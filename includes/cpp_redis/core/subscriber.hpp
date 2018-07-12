@@ -42,11 +42,6 @@ namespace cpp_redis {
 //!
 class subscriber {
 public:
-#ifndef __CPP_REDIS_USE_CUSTOM_TCP_CLIENT
-  //! ctor
-  subscriber(void);
-#endif /* __CPP_REDIS_USE_CUSTOM_TCP_CLIENT */
-
   //!
   //! custom ctor to specify custom tcp_client
   //!

@@ -154,7 +154,7 @@ endif(WIN32)
 if(TACOPIE_LIBRARY)
   target_link_libraries(${PROJECT} ${TACOPIE_LIBRARY})
 else()
-  target_link_libraries(${PROJECT} tacopie)
+  #target_link_libraries(${PROJECT} tacopie)
 endif(TACOPIE_LIBRARY)
 
 
