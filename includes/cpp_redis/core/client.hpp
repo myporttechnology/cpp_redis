@@ -214,7 +214,7 @@ public:
 
     std::unique_lock<std::recursive_mutex> lock_callback(m_callbacks_mutex);
     __CPP_REDIS_LOG(debug, "cpp_redis::client waiting for callbacks to complete");
-    if (!m_sync_condvar.wait_for(lock_callback, timeout, [=] { return m_callbacks_running == 0 && m_commands.empty(); })) {
+    if (!m_sync_condvar.wait_for(lock_callback, timeout, [=, this] { return m_callbacks_running == 0 && m_commands.empty(); })) {
       __CPP_REDIS_LOG(debug, "cpp_redis::client finished waiting for callback");
     }
     else {
